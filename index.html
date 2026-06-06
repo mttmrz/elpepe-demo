@@ -56,7 +56,8 @@
       object-fit: contain;
     }
 
-    #loading-overlay {
+    /* ── overlays (loading + menu) ── */
+    .overlay {
       position: absolute;
       inset: 0;
       background: #0d1117;
@@ -64,12 +65,13 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 28px;
       transition: opacity .4s;
+      z-index: 10;
     }
+    .overlay.hidden { opacity: 0; pointer-events: none; }
 
-    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
-
+    /* loading */
     .spinner {
       width: 40px; height: 40px;
       border: 3px solid #1e2a38;
@@ -78,9 +80,48 @@
       animation: spin .7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
     #status-text { font-size: .9rem; color: #7d8590; }
 
+    /* menu */
+    .menu-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 40%, rgba(20,184,166,.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .menu-title {
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      letter-spacing: .25em;
+      color: #14b8a6;
+      text-shadow: 0 0 48px rgba(20,184,166,.45);
+      z-index: 1;
+    }
+    .menu-sub {
+      font-size: .82rem;
+      color: #484f58;
+      letter-spacing: .08em;
+      z-index: 1;
+    }
+    .menu-play {
+      background: transparent;
+      border: 2px solid #14b8a6;
+      color: #14b8a6;
+      padding: 13px 56px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      letter-spacing: .25em;
+      cursor: pointer;
+      transition: background .2s, box-shadow .2s, transform .15s;
+      z-index: 1;
+    }
+    .menu-play:hover {
+      background: rgba(20,184,166,.14);
+      box-shadow: 0 0 24px rgba(20,184,166,.3);
+      transform: scale(1.04);
+    }
+    .menu-play:active { transform: scale(.98); }
+
+    /* bottom bar */
     .controls {
       margin-top: 16px;
       display: flex;
@@ -88,7 +129,6 @@
       flex-wrap: wrap;
       justify-content: center;
     }
-
     .btn {
       background: transparent;
       border: 1px solid rgba(20,184,166,.4);
@@ -127,9 +167,18 @@
     <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"
             width="1280" height="960"></canvas>
 
-    <div id="loading-overlay">
+    <!-- loading overlay -->
+    <div id="loading-overlay" class="overlay">
       <div class="spinner"></div>
       <div id="status-text">Loading assets…</div>
+    </div>
+
+    <!-- menu overlay (hidden until loading finishes) -->
+    <div id="menu-overlay" class="overlay hidden">
+      <div class="menu-glow"></div>
+      <span class="menu-title">ELPEPE</span>
+      <span class="menu-sub">C++ · SDL2 · WebAssembly</span>
+      <button class="menu-play" onclick="playGame()">PLAY</button>
     </div>
   </div>
 
@@ -146,15 +195,47 @@
   </p>
 
   <script>
-    var overlay    = document.getElementById('loading-overlay');
-    var statusText = document.getElementById('status-text');
+    var loadingOverlay = document.getElementById('loading-overlay');
+    var menuOverlay    = document.getElementById('menu-overlay');
+    var statusText     = document.getElementById('status-text');
+    var gameStarted    = false;
+
+    function playGame() {
+      if (gameStarted) {
+        // level completed — restart fresh
+        location.reload();
+      } else {
+        // first launch — just hide menu, game is already running
+        menuOverlay.classList.add('hidden');
+        document.getElementById('canvas').focus();
+        gameStarted = true;
+      }
+    }
+
+    // called from C++ via EM_ASM({ showMenu(); })
+    function showMenu() {
+      menuOverlay.classList.remove('hidden');
+    }
+
+    function toggleFS() {
+      var canvas = document.getElementById('canvas');
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        var req = canvas.requestFullscreen || canvas.webkitRequestFullscreen;
+        if (req) req.call(canvas);
+      } else {
+        var ex = document.exitFullscreen || document.webkitExitFullscreen;
+        if (ex) ex.call(document);
+      }
+    }
 
     var Module = {
       canvas: document.getElementById('canvas'),
 
       setStatus: function(text) {
         if (!text) {
-          overlay.classList.add('hidden');
+          // loading complete → swap to menu
+          loadingOverlay.classList.add('hidden');
+          menuOverlay.classList.remove('hidden');
           return;
         }
         statusText.textContent = text;
@@ -170,26 +251,11 @@
 
       print: function() {},
       printErr: function(text) { console.error(text); },
-
-      onRuntimeInitialized: function() {
-        overlay.classList.add('hidden');
-      }
     };
 
     window.onerror = function(msg) {
       statusText.textContent = 'Error: ' + msg;
     };
-
-    function toggleFS() {
-      var canvas = document.getElementById('canvas');
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        var req = canvas.requestFullscreen || canvas.webkitRequestFullscreen;
-        if (req) req.call(canvas);
-      } else {
-        var ex = document.exitFullscreen || document.webkitExitFullscreen;
-        if (ex) ex.call(document);
-      }
-    }
   </script>
   <script async src="index.js"></script>
 </body>
