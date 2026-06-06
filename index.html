@@ -207,7 +207,7 @@
         gameStarted = true;
         menuOverlay.classList.add('hidden');
         document.getElementById('canvas').focus();
-        Module.callMain([]);   // actually start main() now
+        Module.ccall('start_game', null, [], []);
       }
     }
 
@@ -228,7 +228,6 @@
     }
 
     var Module = {
-      noInitialRun: true,   // don't call main() on load — wait for PLAY click
       canvas: document.getElementById('canvas'),
 
       setStatus: function(text) {
