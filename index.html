@@ -47,6 +47,15 @@
       background: #000;
     }
 
+    canvas#canvas:fullscreen,
+    canvas#canvas:-webkit-full-screen,
+    canvas#canvas:-moz-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      object-fit: contain;
+    }
+
     #loading-overlay {
       position: absolute;
       inset: 0;
@@ -125,7 +134,7 @@
   </div>
 
   <div class="controls">
-    <button class="btn" onclick="Module.requestFullscreen(true, false)">⛶ Fullscreen</button>
+    <button class="btn" onclick="toggleFS()">⛶ Fullscreen</button>
   </div>
 
   <p class="keys">
@@ -170,6 +179,17 @@
     window.onerror = function(msg) {
       statusText.textContent = 'Error: ' + msg;
     };
+
+    function toggleFS() {
+      var canvas = document.getElementById('canvas');
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        var req = canvas.requestFullscreen || canvas.webkitRequestFullscreen;
+        if (req) req.call(canvas);
+      } else {
+        var ex = document.exitFullscreen || document.webkitExitFullscreen;
+        if (ex) ex.call(document);
+      }
+    }
   </script>
   <script async src="index.js"></script>
 </body>
