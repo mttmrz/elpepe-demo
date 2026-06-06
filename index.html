@@ -207,7 +207,7 @@
         gameStarted = true;
         menuOverlay.classList.add('hidden');
         document.getElementById('canvas').focus();
-        Module.ccall('start_game', null, [], []);
+        Module._start_game();
       }
     }
 
