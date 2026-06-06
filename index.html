@@ -202,13 +202,12 @@
 
     function playGame() {
       if (gameStarted) {
-        // level completed — restart fresh
         location.reload();
       } else {
-        // first launch — just hide menu, game is already running
+        gameStarted = true;
         menuOverlay.classList.add('hidden');
         document.getElementById('canvas').focus();
-        gameStarted = true;
+        Module.callMain([]);   // actually start main() now
       }
     }
 
@@ -229,11 +228,11 @@
     }
 
     var Module = {
+      noInitialRun: true,   // don't call main() on load — wait for PLAY click
       canvas: document.getElementById('canvas'),
 
       setStatus: function(text) {
         if (!text) {
-          // loading complete → swap to menu
           loadingOverlay.classList.add('hidden');
           menuOverlay.classList.remove('hidden');
           return;
