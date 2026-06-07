@@ -97,10 +97,7 @@
       z-index: 1;
     }
     .menu-sub {
-      font-size: .82rem;
-      color: #484f58;
-      letter-spacing: .08em;
-      z-index: 1;
+      display: none;
     }
     .menu-play {
       background: transparent;
@@ -161,7 +158,6 @@
 </head>
 <body>
   <h1>ELPEPE</h1>
-  <p class="subtitle">C++ · SDL2 · WebAssembly demo</p>
 
   <div id="canvas-wrap">
     <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"
@@ -185,14 +181,6 @@
   <div class="controls">
     <button class="btn" onclick="toggleFS()">⛶ Fullscreen</button>
   </div>
-
-  <p class="keys">
-    <kbd>WASD</kbd> Move &nbsp;|&nbsp;
-    <kbd>Q</kbd> Light / Heavy attack &nbsp;|&nbsp;
-    <kbd>Space</kbd> Sword dash / Wand shot &nbsp;|&nbsp;
-    <kbd>E</kbd> Interact &nbsp;|&nbsp;
-    <kbd>Shift</kbd> Run
-  </p>
 
   <script>
     var loadingOverlay = document.getElementById('loading-overlay');
